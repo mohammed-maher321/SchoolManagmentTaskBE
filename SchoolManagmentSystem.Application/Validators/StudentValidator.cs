@@ -17,7 +17,7 @@ public class StudentValidator : AbstractValidator<StudentDto>
                                .NotNull().WithMessage(ShcoolManagmentSystemResource.StudentNameRequired)
                                .MaximumLength(50).WithMessage(ShcoolManagmentSystemResource.StudentNameLength);
 
-        RuleFor(x => x.Courses).NotEmpty().WithMessage(ShcoolManagmentSystemResource.CoursesReqired)
+        RuleFor(x => x.CourseIds).NotEmpty().WithMessage(ShcoolManagmentSystemResource.CoursesReqired)
                                .NotNull().WithMessage(ShcoolManagmentSystemResource.CoursesReqired);
 
         RuleFor(x => x)

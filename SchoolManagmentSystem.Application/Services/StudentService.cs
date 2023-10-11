@@ -25,7 +25,7 @@ public class StudentService : IStudentService
 
     public async Task<Response<bool>> DeleteStudent(int id)
     {
-        StudentSpecification studentSpecification = new StudentSpecification(new StudentQueryModel() { CourseId = id });
+        StudentSpecification studentSpecification = new StudentSpecification(new StudentQueryModel() { StudentId = id });
         var student = await studentRepository.FirstOrDefaultAsync(studentSpecification);
 
         if (student == null)
@@ -36,8 +36,27 @@ public class StudentService : IStudentService
         return Response<bool>.Success(true);
     }
 
+
+    public async Task<Response<StudentDto>> GetStudent(int id)
+    {
+        StudentSpecification studentSpecification = new StudentSpecification(new StudentQueryModel() { StudentId = id });
+        var student = await studentRepository.FirstOrDefaultAsync(studentSpecification);
+
+        if (student == null)
+            throw new NotFoundException("Student", id);
+
+        return Response<StudentDto>.Success(new StudentDto()
+        {
+            Id = student.Id,
+            Name = student.Name,
+            //CourseIds = student.StudentCourses.Select(c => c.CourseId).ToList(),
+            Courses = string.Join(",", student.StudentCourses.Select(c => c.Course?.Name ?? "").ToList())
+        });
+    }
+
     public async Task<PagedListDto<StudentDto>> GetStudents(StudentQueryModel studentQuery)
     {
+        studentQuery.IsPagingEnabled = true;
         StudentSpecification studentSpecification = new StudentSpecification(studentQuery);
         var totalRecords = await studentRepository.CountAsync(studentSpecification);
         List<Student> records = await studentRepository.ListAsync(studentSpecification);
@@ -47,7 +66,7 @@ public class StudentService : IStudentService
             {
                 Id = s.Id,
                 Name = s.Name,
-                Courses = s.StudentCourses.Select(c => new CourseDto() { Name = c.Course?.Name ?? "" ,Id = c.CourseId}).ToList()
+                Courses = string.Join("," , s.StudentCourses.Select(c => c.Course?.Name ?? "").ToList())
             }).ToList() ?? new List<StudentDto>(),
             TotalCount = totalRecords,
             NumberOfPages = (int)Math.Round((decimal)totalRecords / (studentQuery.PageSize ?? 20))
@@ -63,19 +82,27 @@ public class StudentService : IStudentService
 
         Student? student = null;
         if (studentDto.Id == null)
-            student = new Student();
+        {
+            student = new Student()
+            {
+                Name = studentDto.Name,
+                StudentCourses = studentDto.CourseIds.Select(s => new StudentCourse() { CourseId = s }).ToList()
+            };
+            await studentRepository.AddAsync(student);
+        }
         else
         {
-            StudentSpecification studentSpecification = new StudentSpecification(new StudentQueryModel() {StudentId = studentDto.Id });
+            StudentSpecification studentSpecification = new StudentSpecification(new StudentQueryModel() { StudentId = studentDto.Id });
             student = await studentRepository.FirstOrDefaultAsync(studentSpecification);
 
             if (student == null)
                 throw new NotFoundException("student", studentDto.Id);
+            student.Name = studentDto.Name;
+            student.StudentCourses.Clear();
+            student.StudentCourses = studentDto.CourseIds.Select(s => new StudentCourse() { CourseId = s }).ToList();
         }
 
-        student.Name = studentDto.Name;
-        student.StudentCourses.Clear();
-        student.StudentCourses = studentDto.Courses.Select(s => new StudentCourse() { CourseId = s.Id.Value }).ToList();
+        
         await studentRepository.SaveChangesAsync();
 
         studentDto.Id = student.Id;

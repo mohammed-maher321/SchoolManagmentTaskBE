@@ -31,6 +31,12 @@ namespace SchoolManagmentSystem.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetStudent(int id)
+        {
+            var response = await studentService.GetStudent(id);
+            return Ok(response);
+        }
         [HttpDelete]
         public async Task<IActionResult> DeleteStudent(int id)
         {

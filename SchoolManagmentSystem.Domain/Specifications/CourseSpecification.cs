@@ -12,7 +12,7 @@ public class CourseSpecification : Specification<Course>
             .Where(c =>
             !string.IsNullOrWhiteSpace(spec.CourseName) ? c.Name.Contains(spec.CourseName) : true &&
             spec.CourseId != null ? c.Id == spec.CourseId : true &&
-            c.IsDeleted == spec.ExculteDeletedRecord 
+            c.IsDeleted == !spec.ExculteDeletedRecord 
             );
 
         if (spec.IsPagingEnabled ?? false)

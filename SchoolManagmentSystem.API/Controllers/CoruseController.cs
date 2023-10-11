@@ -31,6 +31,13 @@ namespace SchoolManagmentSystem.API.Controllers
             var response = await courseService.SaveCourse(model);
             return Ok(response);
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetCourse(int id)
+        {
+            var response = await courseService.GetCourse(id);
+            return Ok(response);
+        }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteCourse(int id)

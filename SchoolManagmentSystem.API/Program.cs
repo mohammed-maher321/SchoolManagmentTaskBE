@@ -52,7 +52,7 @@ app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocal
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
 app.MapControllers();
 

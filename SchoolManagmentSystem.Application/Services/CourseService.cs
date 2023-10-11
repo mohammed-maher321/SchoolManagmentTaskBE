@@ -35,6 +35,19 @@ public class CourseService : ICourseService
 
     }
 
+    public async Task<Response<CourseDto>> GetCourse(int id)
+    {
+        CourseSpecification courseSpecification = new CourseSpecification(new CourseQueryModel() { CourseId = id });
+        var course = await courseRepository.FirstOrDefaultAsync(courseSpecification);
+
+        if (course == null)
+            throw new NotFoundException("Course", id);
+
+        
+        return Response<CourseDto>.Success(new CourseDto { Id = course.Id , Name = course.Name});
+
+    }
+
     public async Task<PagedListDto<CourseDto>> GetCourses(CourseQueryModel courseQuery)
     {
         CourseSpecification courseSpecification = new CourseSpecification(courseQuery);
@@ -61,7 +74,14 @@ public class CourseService : ICourseService
 
         Course? course = null;
         if (courseDto.Id == null)
-            course = new Course();
+        {
+            course = new Course()
+            {
+                Name = courseDto.Name
+            };
+
+            await courseRepository.AddAsync(course);
+        }
         else
         {
             CourseSpecification courseSpecification = new CourseSpecification(new CourseQueryModel() { CourseId = courseDto.Id });
@@ -69,9 +89,11 @@ public class CourseService : ICourseService
 
             if (course == null)
                 throw new NotFoundException("Course", courseDto.Id);
+    
+            course.Name = courseDto.Name;
+
         }
 
-        course.Name = courseDto.Name;
         await courseRepository.SaveChangesAsync();
 
         courseDto.Id = course.Id;

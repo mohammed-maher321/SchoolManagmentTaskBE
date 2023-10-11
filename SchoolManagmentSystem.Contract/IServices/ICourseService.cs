@@ -7,5 +7,6 @@ public interface ICourseService
 {
     public Task<PagedListDto<CourseDto>> GetCourses(CourseQueryModel courseQuery);
     Task<Response<CourseDto>> SaveCourse(CourseDto courseDto);
+    Task<Response<CourseDto>> GetCourse(int id);
     Task<Response<bool>> DeleteCourse(int id);
 }

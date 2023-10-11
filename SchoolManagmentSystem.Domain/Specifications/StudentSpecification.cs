@@ -16,8 +16,8 @@ public class StudentSpecification : Specification<Student>
             !string.IsNullOrWhiteSpace(spec.StudentName) ? c.Name.Contains(spec.StudentName) : true &&
             spec.CourseId != null ? c.StudentCourses.Where(s => s.CourseId == spec.CourseId).Count() > 0 : true &&
             spec.StudentId != null ? c.Id == spec.StudentId : true &&
-            c.IsDeleted == spec.ExculteDeletedRecord &&
-            c.StudentCourses.Where(a => a.Course.IsDeleted == spec.ExculteDeletedRecord).Count() > 0
+            c.IsDeleted == !spec.ExculteDeletedRecord &&
+            c.StudentCourses.Where(a => a.Course.IsDeleted == !spec.ExculteDeletedRecord).Count() > 0
         );
 
         if (spec.IsPagingEnabled ?? false)
